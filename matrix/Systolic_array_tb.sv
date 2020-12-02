@@ -1,3 +1,4 @@
+`include "../io/if.sv"
 module Systolic_array_tb(
     input logic clk
 );
@@ -11,7 +12,13 @@ module Systolic_array_tb(
     logic [15:0] l_d[0:2];
     logic [15:0] t_d[0:2][0:2];
 
-    Systolic_array SA(
+    bus_if  vec_csr_if();
+    bus_if  mat_csr_if();
+    bus_if  csr_if();
+
+    Systolic_array #(
+        .PE_NUMBER(3)
+    ) SA (
         .clk    (clk    ),
         .read   (read   ),
         .reset  (reset  ),
@@ -19,10 +26,35 @@ module Systolic_array_tb(
         .pe_t_w (pe_t_w )
     );
 
+    Controller Controller(
+        .clk    (clk    ),
+        .read   (read   ),
+        .reset  (reset  ),
+        .vec_csr_if (vec_csr_if ),
+        .mat_csr_if (mat_csr_if ),
+        .csr_if (csr_if )
+    );
+
     assign cnt_w = cnt + 1;
+    assign vec_csr_if.data = 3;
+    assign mat_csr_if.data = 3;
+    assign csr_if.data = 1;
 
     always_ff @(posedge clk) begin
         cnt = cnt_w;
+        if(cnt <= 2) begin
+            vec_csr_if.valid <= 1;
+            mat_csr_if.valid <= 1;
+        end else begin
+            vec_csr_if.valid <= 0;
+            mat_csr_if.valid <= 0;
+        end
+        if(cnt == 3) begin
+            csr_if.valid <= 1;
+        end else begin
+            csr_if.valid <= 0;
+        end
+/* アレイのテスト用
         if(cnt <= 2) begin
             reset = 1;
         end else begin
@@ -48,7 +80,7 @@ module Systolic_array_tb(
         if(7 < cnt) begin
             read = 1;
         end
-
+*/
     end
 
     initial begin
