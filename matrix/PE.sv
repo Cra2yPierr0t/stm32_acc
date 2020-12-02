@@ -13,7 +13,8 @@ module PE(
     logic [15:0] buffer;
 
     logic [15:0] l_d_o_w;
-    logic [15:0] r_d_o_w;
+
+    logic [15:0] r_d_o_r;
     
     always_comb begin
         if(reset) begin
@@ -25,23 +26,35 @@ module PE(
         end
 
         if(reset) begin
-            r_d_o_w = 16'h0000;
-        end else begin
-            r_d_o_w = l_d_i;
-        end
-
-        if(reset) begin
             l_d_o_w = 16'h0000;
         end else if(read) begin
             l_d_o_w = buffer;
         end else begin
             l_d_o_w = 16'h0000;
         end
+
+        r_d_o = r_d_o_r;
+        if(read) begin
+            l_d_o = buffer;
+        end else begin
+            l_d_o = 16'h0000;
+        end
     end
+
+    /*
+    assign buffer_w = reset ? 16'h0000
+                    : read  ? r_d_i
+                    : buffer + l_d_i * t_d_i;
+
+    assign r_d_o_w  = reset ? 16'h0000 : l_d_i;
+
+    assign l_d_o_w  = reset ? 16'h0000
+                    : read  ? buffer
+                    : 16'h0000;
+    */
 
     always_ff @(posedge clk) begin
         buffer  <= buffer_w;
-        r_d_o   <= r_d_o_w;
-        l_d_o   <= l_d_o_w;
+        r_d_o_r <= l_d_i;
     end
 endmodule
