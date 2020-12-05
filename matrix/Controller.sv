@@ -4,7 +4,9 @@ module Controller(
     output  logic reset,
     bus_if.slv_port vec_csr_if,
     bus_if.slv_port mat_csr_if,
-    bus_if.slv_port csr_if
+    bus_if.slv_port csr_if,
+    output  logic [ADDR_SIZE-1:0] pe_t_o_addr[0:PE_NUMBER-1],
+    output  logic [ADDR_SIZE-1:0] l_d_o_addr
 );
 
 parameter WAIT  = 2'b00;
