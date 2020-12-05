@@ -11,7 +11,9 @@ module Controller #(
     bus_if.slv_port mat_csr_if,
     bus_if.slv_port csr_if,
     output  logic [ADDR_SIZE-1:0] pe_t_o_addr[0:PE_NUMBER-1],
-    output  logic [ADDR_SIZE-1:0] l_d_o_addr
+    output  logic [ADDR_SIZE-1:0] l_d_o_addr,
+    output  logic [ADDR_SIZE-1:0] w_addr,
+    output  logic w_en
 );
 
 parameter WAIT  = 2'b00;
@@ -38,6 +40,9 @@ parameter MEM_CAL_WAIT = 2'b11;
 
     logic [1:0] array_state = WAIT;
     logic [1:0] mem_state   = WAIT;
+
+    logic [ADDR_SIZE-1:0] w_addr_buf = '0;
+    logic [ADDR_SIZE-1:0] w_addr_cnt = '0;
 
     always_ff @(posedge vec_csr_if.valid) begin
         row_size    <= vec_csr_if.data;
@@ -99,6 +104,8 @@ parameter MEM_CAL_WAIT = 2'b11;
                     mem_state <= MEM_WAIT;
                 end
                 l_d_o_addr <= ZERO_POINT_ADDR;
+                w_en        <= '0;
+                w_addr_cnt  <= '0;
             end
             MEM_FETCH   : begin
                 if(column_cnt < column_size) begin
@@ -119,7 +126,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end
             end
             MEM_CAL_WAIT    : begin
-                if(cal_cnt < row_size + column_size - 1 - 1) begin
+                if(cal_cnt < row_size + column_size - 1) begin
                     mem_state <= mem_state;
                 end else begin
                     mem_state <= MEM_WRITE;
@@ -131,6 +138,9 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end else begin
                     mem_state <= MEM_WAIT;
                 end
+                w_en        <= '1;
+                w_addr      <= w_addr_buf + 1 + w_addr_cnt;
+                w_addr_cnt  <= w_addr_cnt + 1;
             end
         endcase
     end
@@ -141,9 +151,11 @@ parameter MEM_CAL_WAIT = 2'b11;
             if(mem_state == MEM_FETCH) begin
                 if(row_size > i) begin
                     if(column_cnt < column_size) begin
-                        pe_t_o_addr[i] <= MEM_HEAD_ADDR + row_size + i + mem_index;
+                        pe_t_o_addr[i]  <= MEM_HEAD_ADDR + row_size + i + mem_index;
+                        w_addr_buf      <= MEM_HEAD_ADDR + row_size + i + mem_index;
                     end else begin
-                        pe_t_o_addr[i] <= ZERO_POINT_ADDR;
+                        pe_t_o_addr[i]  <= ZERO_POINT_ADDR;
+                        w_addr_buf      <= w_addr_buf;
                     end
                 end else begin
                     pe_t_o_addr[i] <= ZERO_POINT_ADDR; 
