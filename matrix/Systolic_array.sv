@@ -14,9 +14,10 @@ module Systolic_array #(
 
     //delay_bufferの数は後で
     logic [15:0] delay_buffer[1:(PE_NUMBER)*(PE_NUMBER-1)/2];
-    logic [15:0] pe_t_w_delayed[1:PE_NUMBER-1],
+    logic [15:0] pe_t_w_delayed[1:PE_NUMBER-1];
 
-    genvar i, j;
+    genvar i;
+    genvar j;
     generate
         PE PE(
             .clk    (clk    ),
@@ -34,12 +35,12 @@ module Systolic_array #(
             end
             if(1 < i) begin
                 for(j = i*(i-1)/2+1; j < i*(i+1)/2; j = j + 1) begin : generate_delay_buffer
-                    delay_buffer[j] <= delay_buffer[j+1];
+                    always_ff @(posedge clk) begin
+                        delay_buffer[j] <= delay_buffer[j+1];
+                    end
                 end
             end
-            always_ff @(posedge clk) begin
-                assign pe_t_w_delayed[i] = delay_buffer[i*(i-1)/2+1];
-            end
+            assign pe_t_w_delayed[i] = delay_buffer[i*(i-1)/2+1];
             PE PE(
                 .clk    (clk    ),
                 .read   (read   ),
