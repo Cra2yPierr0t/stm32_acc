@@ -1,5 +1,6 @@
 module Systolic_array #(
-    parameter PE_NUMBER = 64
+    parameter PE_NUMBER = 64,
+    parameter WORD_SIZE = 16
 )(
     input logic clk,
     input logic read,
@@ -19,7 +20,9 @@ module Systolic_array #(
     genvar i;
     genvar j;
     generate
-        PE PE(
+        PE #(
+            .WORD_SIZE(WORD_SIZE)
+        ) PE (
             .clk    (clk    ),
             .read   (read   ),
             .reset  (reset  ),

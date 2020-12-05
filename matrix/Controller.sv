@@ -108,7 +108,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                     mem_index <= '0;
                 end
                 if(row_cnt < row_size) begin    //vec fetch
-                    l_d_o_addr <= MEM_HEAD_ADDR + 1 + row_cnt;
+                    l_d_o_addr <= MEM_HEAD_ADDR + row_cnt;
                     row_cnt <= row_cnt + 1;
                     mem_state <= mem_state;
                 end else begin
@@ -140,7 +140,7 @@ parameter MEM_CAL_WAIT = 2'b11;
             if(mem_state == MEM_FETCH) begin
                 if(row_size > i) begin
                     if(column_cnt < column_size) begin
-                        pe_t_o_addr[i] <= MEM_HEAD_ADDR + 1 + row_size + i + mem_index;
+                        pe_t_o_addr[i] <= MEM_HEAD_ADDR + row_size + i + mem_index;
                     end else begin
                         pe_t_o_addr[i] <= ZERO_POINT_ADDR;
                     end
