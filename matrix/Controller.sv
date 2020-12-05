@@ -31,6 +31,9 @@ parameter MEM_CAL_WAIT = 2'b11;
     logic [7:0] cal_cnt = 8'h00;
     logic [7:0] read_cnt = 8'h00;
 
+    logic [7:0] row_cnt = '0;
+    logic [7:0] column_cnt = '0;
+
     logic   run_req = 0;
 
     logic [1:0] array_state = WAIT;
@@ -97,32 +100,17 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end
             end
             MEM_FETCH   : begin
-                genvar i;
-                generate 
-                    for(i = 0; i < PE_NUMBER; i = i + 1) begin : gen_fetch_system
-                        if(row_size < i) begin
-                            if(column_cnt < column_size) begin
-                                pe_t_o_addr[i] <= MEM_HEAD_ADDR + 1 + row_size + i + mem_index;
-                            end else begin
-                                pe_t_o_addr[i] <= ZERO_POINT_ADDR;
-                            end
-                        end else begin
-                            pe_t_o_addr[i] <= ZERO_POINT_ADDR; 
-                        end
-                    end
-                    if(column_cnt < column_size) begin
-                        column_cnt <= column_cnt + 1;
-                        mem_index <= mem_index + column_size;
-                    end else begin
-                        column_cnt <= '0;
-                        mem_index <= '0;
-                    end
-                endgenerate
-
+                if(column_cnt < column_size) begin
+                    column_cnt <= column_cnt + 1;
+                    mem_index <= mem_index + column_size;
+                end else begin
+                    column_cnt <= '0;
+                    mem_index <= '0;
+                end
                 if(row_cnt < row_size) begin    //vec fetch
                     l_d_o_addr <= MEM_HEAD_ADDR + 1 + row_cnt;
                     row_cnt <= row_cnt + 1;
-                    mem_state <= state;
+                    mem_state <= mem_state;
                 end else begin
                     l_d_o_addr <= ZERO_POINT_ADDR;
                     row_cnt <= '0;
@@ -145,4 +133,22 @@ parameter MEM_CAL_WAIT = 2'b11;
             end
         endcase
     end
+    genvar i;
+    generate 
+    for(i = 0; i < PE_NUMBER; i = i + 1) begin : gen_fetch_system
+        always_ff @(posedge clk) begin
+            if(mem_state == MEM_FETCH) begin
+                if(row_size > i) begin
+                    if(column_cnt < column_size) begin
+                        pe_t_o_addr[i] <= MEM_HEAD_ADDR + 1 + row_size + i + mem_index;
+                    end else begin
+                        pe_t_o_addr[i] <= ZERO_POINT_ADDR;
+                    end
+                end else begin
+                    pe_t_o_addr[i] <= ZERO_POINT_ADDR; 
+                end
+            end
+        end
+    end
+    endgenerate
 endmodule
