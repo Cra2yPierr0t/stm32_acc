@@ -64,7 +64,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                 csr_if.ready <= 1;
             end
             CAL     : begin
-                if(cal_cnt < row_size + column_size - 1 - 1) begin
+                if(cal_cnt < row_size + column_size - 1) begin
                     cal_cnt <= cal_cnt + 8'h01;
                 end else begin
                     array_state   <= READ;
