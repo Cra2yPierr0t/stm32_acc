@@ -41,18 +41,6 @@ module PE(
         end
     end
 
-    /*
-    assign buffer_w = reset ? 16'h0000
-                    : read  ? r_d_i
-                    : buffer + l_d_i * t_d_i;
-
-    assign r_d_o_w  = reset ? 16'h0000 : l_d_i;
-
-    assign l_d_o_w  = reset ? 16'h0000
-                    : read  ? buffer
-                    : 16'h0000;
-    */
-
     always_ff @(posedge clk) begin
         buffer  <= buffer_w;
         r_d_o_r <= l_d_i;
