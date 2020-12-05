@@ -98,6 +98,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end else begin
                     mem_state <= MEM_WAIT;
                 end
+                l_d_o_addr <= ZERO_POINT_ADDR;
             end
             MEM_FETCH   : begin
                 if(column_cnt < column_size) begin
@@ -147,6 +148,8 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end else begin
                     pe_t_o_addr[i] <= ZERO_POINT_ADDR; 
                 end
+            end else begin
+                pe_t_o_addr[i] <= ZERO_POINT_ADDR; 
             end
         end
     end
