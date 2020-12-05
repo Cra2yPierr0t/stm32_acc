@@ -26,6 +26,7 @@ module Systolic_array_tb(
         .pe_t_w (pe_t_w )
     );
 
+/*
     Controller Controller(
         .clk    (clk    ),
         .read   (read   ),
@@ -34,14 +35,18 @@ module Systolic_array_tb(
         .mat_csr_if (mat_csr_if ),
         .csr_if (csr_if )
     );
+*/
 
     assign cnt_w = cnt + 1;
+/*
     assign vec_csr_if.data = 3;
     assign mat_csr_if.data = 3;
     assign csr_if.data = 1;
+*/
 
     always_ff @(posedge clk) begin
         cnt = cnt_w;
+/* コントローラのテスト用
         if(cnt <= 2) begin
             vec_csr_if.valid <= 1;
             mat_csr_if.valid <= 1;
@@ -54,7 +59,7 @@ module Systolic_array_tb(
         end else begin
             csr_if.valid <= 0;
         end
-/* アレイのテスト用
+*/
         if(cnt <= 2) begin
             reset = 1;
         end else begin
@@ -63,24 +68,17 @@ module Systolic_array_tb(
         if((3 <= cnt) && (cnt <= 5)) begin
             l_d_i = l_d[cnt - 3];
             pe_t_w[0] = t_d[0][cnt - 3];
+            pe_t_w[1] = t_d[1][cnt - 3];
+            pe_t_w[2] = t_d[2][cnt - 3];
         end else begin
             l_d_i = 0;
             pe_t_w[0] = 0;
-        end
-        if((4 <= cnt) && (cnt <= 6)) begin
-            pe_t_w[1] = t_d[1][cnt - 4];
-        end else begin
             pe_t_w[1] = 0;
-        end
-        if((5 <= cnt) && (cnt <= 7)) begin
-            pe_t_w[2] = t_d[2][cnt - 5];
-        end else begin
             pe_t_w[2] = 0;
         end
         if(7 < cnt) begin
             read = 1;
         end
-*/
     end
 
     initial begin
