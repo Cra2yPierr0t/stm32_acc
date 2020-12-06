@@ -1,7 +1,7 @@
 interface bus_if;
     logic   ready;
     logic   valid;
-    logic   [7:0] data;
+    logic   [15:0] data;
     modport mst_port(input ready, output valid, data);
     modport slv_port(input valid, data, output ready);
 endinterface

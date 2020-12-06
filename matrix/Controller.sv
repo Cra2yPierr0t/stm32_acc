@@ -5,6 +5,7 @@ module Controller #(
     parameter ZERO_POINT_ADDR = 16'hffff
 )(
     input   clk,
+    bus_if.slv_port spi_2_bus_if,
     output  logic read,
     output  logic reset,
     bus_if.slv_port vec_csr_if,
