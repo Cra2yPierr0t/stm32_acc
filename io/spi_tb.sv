@@ -1,5 +1,7 @@
 module spi_tb(
     output logic [7:0] led,
+    input logic cs,
+    input logic clk,
     spi_if.slv_port spi_port
 );
     
@@ -10,6 +12,6 @@ module spi_tb(
     );
 
     always_ff @(posedge bus_mst_port.valid) begin
-        led <= bus_mst_port.data;
+        led <= bus_mst_port.data[7:0];
     end
 endmodule

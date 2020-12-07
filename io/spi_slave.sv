@@ -1,49 +1,61 @@
 module spi_slave #(
+    parameter DATA_SIZE = 16,
+    parameter INDEX_WIDTH = $clog(DATA_SIZE),
     parameter FPGA_CLK  = 12_000_000,
-    parameter SPI_CLK   = 1_000_000,
-    parameter DATA_SIZE = 16
+    parameter SPI_CLK   = 1_000_000
 )(
+    input logic clk,
     input logic cs,
     spi_if.slv_port spi_port,
     bus_if.mst_port bus_mst_port,
-    bus_if.mst_port bus_slv_port
+    bus_if.slv_port bus_slv_port
 );
 
     logic   [DATA_SIZE-1:0] mo_data;
-    logic   [3:0] mo_data_index = 4'b0000;
+    logic   [INDEX_WIDTH-1:0] mo_data_index = '0;
 
-    always_ff @(posedge spi_port.sclk) begin    // read
-        if(cs == 0) begin
-            mo_data[mo_data_index] <= spi_port.mosi;
-            if(mo_data_index == DATA_SIZE - 1) begin
-                mo_data_index <='0;
+    logic   [DATA_SIZE-1:0] so_data = '0;
+    logic   [INDEX_WIDTH-1:0] so_data_index = '0;
+
+    logic [1:0] shift_reg = 2'b00;
+    logic [1:0] shift_reg_2 = 2'b00;
+
+    always_ff @(posedge clk) begin
+        shift_reg <= {shift_reg[0], spi_port.sclk};
+        if(shift_reg == 2'b01) begin    // read
+            if(cs == 0) begin
+                mo_data[~mo_data_index] <= spi_port.mosi;
+                mo_data_index <= mo_data_index + 1;
             end else begin
-                mo_data_index <= mo_data_index + '1;
+                mo_data <= mo_data;
             end
         end else begin
+            mo_data <= mo_data;
             mo_data_index <= mo_data_index;
         end
-    end
-
-    logic   [DATA_SIZE-1:0] so_data = 16'h5555;
-    logic   [3:0] so_data_index = 4'b0000;
-
-    always_ff @(posedge bus_slv_port.valid) begin
-        so_data <= bus_slv_port.data;
-    end
-
-    always_ff @(negedge spi_port.sclk) begin    // write
-        if(cs == 0) begin
-            spi_port.miso <= so_data[so_data_index];
-            if(so_data_index == DATA_SIZE - 1) begin
-                so_data_index <= '0;
-                bus_slv_port.ready <= '1;
+        
+        if(shift_reg == 2'b10) begin    // write
+            if(cs == 0) begin
+                spi_port.miso <= so_data[~so_data_index];
+                so_data_index <= so_data_index + 1;
             end else begin
-                so_data_index <= so_data_index + '1;
-                bus_slv_port.ready <= '0;
+                spi_port.miso <= so_data[INDEX_WIDTH-1];
+                so_data_index <= 1;
+            end
+            if(so_data_index == '0) begin
+                bus_slv_port.ready <= 1;
+            end else begin
+                bus_slv_port.ready <= 0;
             end
         end else begin
+            spi_port.miso <= spi_port.miso;
             so_data_index <= so_data_index;
+        end
+        shift_reg_2 <= {shift_reg_2[0], bus_slv_port.valid};
+        if(shift_reg_2 == 2'b01) begin
+            so_data <= bus_slv_port.data;
+        end else begin
+            so_data <= so_data;
         end
     end
 
