@@ -1,8 +1,7 @@
 module #(
     parameter GENERAL_CSR_ADDR = 12'h000,
     parameter WRITE_COMMAND = 4'h1,
-    parameter READ_COMMAND = 4'h1,
-    parameter END_WRITE_COMMAND = 4'h2,
+    parameter READ_COMMAND = 4'h2,
     parameter VEC_CSR_ADDR = 12'h001,
     parameter MAT_CSR_ADDR = 12'h002,
 ) CSR (
