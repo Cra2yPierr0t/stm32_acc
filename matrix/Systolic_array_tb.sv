@@ -19,6 +19,7 @@ module Systolic_array_tb(
     logic [9:0] l_d_o_addr;
 
     logic [9:0] w_addr;
+    logic [9:0] r_addr;
     logic [15:0] w_data;
     logic w_en;
 
@@ -26,6 +27,7 @@ module Systolic_array_tb(
     bus_if  mat_csr_if();
     bus_if  csr_if();
     bus_if  spi_2_bus_if();
+    bus_if  bus_2_spi_if();
 
     /*
     assign l_d_i = (l_d_o_addr == 10'b11_0101_0101) ? '0 : mem[l_d_o_addr];
@@ -63,6 +65,7 @@ module Systolic_array_tb(
         .read   (read   ),
         .reset  (reset  ),
         .spi_2_bus_if (spi_2_bus_if ),
+        .bus_2_spi_if (bus_2_spi_if ),
         .vec_csr_if (vec_csr_if ),
         .mat_csr_if (mat_csr_if ),
         .csr_if (csr_if ),
@@ -70,19 +73,46 @@ module Systolic_array_tb(
         .l_d_o_addr     (l_d_o_addr     ),
         .w_addr         (w_addr         ),
         .w_en           (w_en           ),
-        .w_data         (w_data         )
+        .w_data         (w_data         ),
+        .r_addr         (r_addr         ) 
     );
 
     assign cnt_w = cnt + 1;
-    assign vec_csr_if.data = 3;
+    assign vec_csr_if.data = 2;
     assign mat_csr_if.data = 3;
-    assign csr_if.data = 0;
+    assign csr_if.data = 1;
 
     always_ff @(posedge clk) begin
         cnt = cnt_w;
+/* TPU -> マイコンの結果読み出し機構テスト用
+        if(cnt <= 2) begin
+            vec_csr_if.valid <= 1;
+            mat_csr_if.valid <= 1;
+        end else begin
+            vec_csr_if.valid <= 0;
+            mat_csr_if.valid <= 0;
+        end
+        if(cnt == 3) begin
+            csr_if.valid <= 1;
+        end else begin
+            csr_if.valid <= 0;
+        end
+        if((3 < cnt) && (cnt < 5)) begin
+            spi_2_bus_if.valid <= 0;
+        end else if((5 < cnt) && (cnt < 7)) begin
+            spi_2_bus_if.data <= 16'h6000;
+            spi_2_bus_if.valid <= 1;
+        end else if((5 < cnt) && (cnt < 100)) begin
+            spi_2_bus_if.valid <= 0;
+        end
+    end
+*/
+/* マイコン -> TPUのデータ書き込み機構テスト用
         if(cnt <= 1) begin
             spi_2_bus_if.data <= 16'h4000;
             spi_2_bus_if.valid <= 1;
+            vec_csr_if.valid <= 1;
+            mat_csr_if.valid <= 1;
         end else if((1 < cnt) && (cnt < 3)) begin
             spi_2_bus_if.valid <= 0;
         end else if((3 < cnt) && (cnt < 5)) begin
@@ -125,21 +155,23 @@ module Systolic_array_tb(
             spi_2_bus_if.valid <= 1;
         end else if((36 < cnt) && (cnt < 38)) begin
             spi_2_bus_if.valid <= 0;
-        end else if((38 < cnt) && (cnt < 40)) begin
+        end else if((38 < cnt) && (cnt < 45)) begin
             spi_2_bus_if.data <= 16'h5555;
-            spi_2_bus_if.valid <= 1;
-        end else if((40 < cnt) && (cnt < 42)) begin
             spi_2_bus_if.valid <= 0;
-        end else if((42 < cnt) && (cnt < 44)) begin
+        end else if((45 < cnt) && (cnt < 47)) begin
+            spi_2_bus_if.valid <= 1;
+        end else if((47 < cnt) && (cnt < 49)) begin
+            spi_2_bus_if.valid <= 0;
+        end else if((49 < cnt) && (cnt < 51)) begin
             spi_2_bus_if.data <= 16'h89ab;
             spi_2_bus_if.valid <= 1;
-        end else if((44 < cnt) && (cnt < 100)) begin
+        end else if((51 < cnt) && (cnt < 100)) begin
             spi_2_bus_if.valid <= 0;
         end
     end
-/* マイコン -> TPUのメモリ機構テスト用
 */
 /* コントローラのテスト用
+*/
         if(cnt <= 2) begin
             vec_csr_if.valid <= 1;
             mat_csr_if.valid <= 1;
@@ -148,12 +180,28 @@ module Systolic_array_tb(
             mat_csr_if.valid <= 0;
         end
         if(cnt == 3) begin
-            csr_if.valid <= 1;
+            spi_2_bus_if.data <= 16'h3000;
+            spi_2_bus_if.valid <= 1;
         end else begin
-            csr_if.valid <= 0;
+            spi_2_bus_if.valid <= 0;
+        end
+        if((25 < cnt) && (cnt < 27)) begin
+            spi_2_bus_if.data <= 16'h6000;
+            spi_2_bus_if.valid <= 1;
+        end else if((27 < cnt) && (cnt < 30)) begin
+            bus_2_spi_if.ready <= 0;
+        end else if((30 < cnt) && (cnt < 33)) begin
+            bus_2_spi_if.ready <= 1;
+        end else if((33 < cnt) && (cnt < 37)) begin
+            bus_2_spi_if.ready <= 0;
+        end else if((37 < cnt) && (cnt < 39)) begin
+            bus_2_spi_if.ready <= 1;
+        end else if((40 < cnt) && (cnt < 42)) begin
+            bus_2_spi_if.ready <= 0;
+        end else begin
+            bus_2_spi_if.ready <= 1;
         end
     end
-*/
 /* アレイのテスト用
         if(cnt <= 2) begin
             reset = 1;

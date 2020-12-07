@@ -65,6 +65,9 @@ parameter MEM_CAL_WAIT = 2'b11;
 
     logic [ADDR_SIZE-1:0] r_addr_cnt = '0;
 
+    logic [1:0] start_shift_reg;
+    logic start_flag = 0;
+
     always_ff @(posedge vec_csr_if.valid) begin
         row_size    <= vec_csr_if.data;
     end
@@ -76,9 +79,10 @@ parameter MEM_CAL_WAIT = 2'b11;
     end
 
     always_ff @(posedge clk) begin
+        start_shift_reg <= {start_shift_reg[0], start_flag};
         case(array_state)
             WAIT    : begin
-                if(run_req == 1) begin
+                if(start_shift_reg == 2'b01) begin
                     array_state <= CAL;
                 end else begin
                     array_state <= WAIT;
@@ -119,7 +123,7 @@ parameter MEM_CAL_WAIT = 2'b11;
 
         case(mem_state)
             MEM_WAIT    : begin
-                if(run_req == 1) begin
+                if(start_shift_reg == 2'b01) begin
                     mem_state <= MEM_FETCH;
                 end else begin
                     mem_state <= MEM_WAIT;
@@ -133,9 +137,11 @@ parameter MEM_CAL_WAIT = 2'b11;
                 if(column_cnt < column_size) begin
                     column_cnt <= column_cnt + 1;
                     mem_index <= mem_index + row_size;
+                    w_addr_buf  <= MEM_HEAD_ADDR + row_size + row_size - 1 + mem_index;
                 end else begin
                     column_cnt <= column_cnt;
                     mem_index <= '0;
+                    w_addr_buf  <= w_addr_buf;
                 end
                 if(row_cnt < row_size) begin    //vec fetch
                     l_d_o_addr <= MEM_HEAD_ADDR + row_cnt;
@@ -160,9 +166,9 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end else begin
                     mem_state <= MEM_WAIT;
                 end
+                w_addr_buf_buf <= w_addr_buf;
                 w_en_result <= '1;
                 w_addr_result   <= w_addr_buf + 1 + w_addr_cnt;
-                w_addr_buf_buf <= w_addr_buf; //TPU -> STMに使う
                 w_addr_cnt  <= w_addr_cnt + 1;
             end
         endcase
@@ -175,10 +181,8 @@ parameter MEM_CAL_WAIT = 2'b11;
                 if(row_size > i) begin
                     if(column_cnt < column_size) begin
                         pe_t_o_addr[i]  <= MEM_HEAD_ADDR + row_size + i + mem_index;
-                        w_addr_buf  <= MEM_HEAD_ADDR + row_size + i + mem_index;
                     end else begin
                         pe_t_o_addr[i]  <= ZERO_POINT_ADDR;
-                        w_addr_buf  <= w_addr_buf;
                     end
                 end else begin
                     pe_t_o_addr[i] <= ZERO_POINT_ADDR; 
@@ -222,6 +226,7 @@ parameter MEM_CAL_WAIT = 2'b11;
             if(spi_shift_reg == 2'b01) begin
                 case(spi_2_bus_if.data[15:12])
                     START_CAL   : begin
+                        start_flag <= 1;
                     end
                     WRITE_VEC   : begin
                         write_vec_flag <= 1;
@@ -245,6 +250,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                 if(read_shift_reg == 2'b01) begin
                     read_result_flag <= 0;
                 end
+                start_flag <= 0;
             end
         end
 
@@ -295,11 +301,12 @@ parameter MEM_CAL_WAIT = 2'b11;
                     r_addr_cnt <= 0;
                     end_read_flag <= 1;
                 end
-                r_addr <= w_addr_buf_buf + 1 + r_addr_cnt;
-                bus_2_spi_if.valid = 1;
+                bus_2_spi_if.valid <= 1;
             end else begin
-                bus_2_spi_if.valid = 0;
+                r_addr_cnt <= r_addr_cnt;
             end
+            w_en_data <= 1;
+            r_addr <= w_addr_buf_buf + r_addr_cnt + 1;
         end else begin
             w_en_data <= 0;
             mat_addr <= 0;
