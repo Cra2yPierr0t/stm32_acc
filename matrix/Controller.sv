@@ -242,18 +242,18 @@ parameter MEM_CAL_WAIT = 2'b11;
                     default     : begin
                     end
                 endcase
-            end else begin
-                if(vec_shift_reg == 2'b01) begin
-                    write_vec_flag <= 0;
-                end
-                if(mat_shift_reg == 2'b01) begin
-                    write_mat_flag <= 0;
-                end
-                if(read_shift_reg == 2'b01) begin
-                    read_result_flag <= 0;
-                end
-                start_flag <= 0;
             end
+        end else begin
+            if(vec_shift_reg == 2'b01) begin
+                write_vec_flag <= 0;
+            end
+            if(mat_shift_reg == 2'b01) begin
+                write_mat_flag <= 0;
+            end
+            if(read_shift_reg == 2'b01) begin
+                read_result_flag <= 0;
+            end
+            start_flag <= 0;
         end
 
         if(write_vec_flag == 1) begin
@@ -319,9 +319,20 @@ parameter MEM_CAL_WAIT = 2'b11;
 
     always_comb begin
         if(write_mat_flag || write_vec_flag) begin
-            w_en = w_en_data;
-            w_addr = w_addr_data;
-            w_data = w_data_data;
+            if(write_vec_flag) begin
+                w_addr = vec_addr;
+            end else begin
+                w_addr = mat_addr + row_size;
+            end
+            if(spi_shift_reg == 2'b01) begin
+                w_en = 1;
+            end else begin
+                w_en = 0;
+            end
+            w_data = spi_2_bus_if.data;
+            //w_addr = w_addr_data;
+            //w_data = w_data_data;
+            //w_en   = w_en_data;
         end else begin
             w_en = w_en_result;
             w_addr = w_addr_result;

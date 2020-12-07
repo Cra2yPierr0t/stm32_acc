@@ -113,64 +113,64 @@ module TOY_accelerator_tb(
         end else if(cnt == 12) begin
             spi_2_bus_if.data <= 16'h4000;
             spi_2_bus_if.valid <= 1;
-        end else if(cnt == 11) begin
-            spi_2_bus_if.valid <= 0;
-        end else if(cnt == 12) begin
-            spi_2_bus_if.data <= 16'h0012;
-            spi_2_bus_if.valid <= 1;
         end else if(cnt == 13) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 14) begin
-            spi_2_bus_if.data <= 16'h0035;
+            spi_2_bus_if.data <= 16'h0012;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 15) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 16) begin
-            spi_2_bus_if.data <= 16'h002a;
+            spi_2_bus_if.data <= 16'h0035;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 17) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 18) begin
-            spi_2_bus_if.data <= 16'h5000;
+            spi_2_bus_if.data <= 16'h002a;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 19) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 20) begin
-            spi_2_bus_if.data <= 16'h0031;
+            spi_2_bus_if.data <= 16'h5000;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 21) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 22) begin
-            spi_2_bus_if.data <= 16'h0050;
+            spi_2_bus_if.data <= 16'h0031;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 23) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 24) begin
-            spi_2_bus_if.data <= 16'h0001;
+            spi_2_bus_if.data <= 16'h0050;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 25) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 26) begin
-            spi_2_bus_if.data <= 16'h0012;
+            spi_2_bus_if.data <= 16'h0001;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 27) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 28) begin
-            spi_2_bus_if.data <= 16'h000a;
+            spi_2_bus_if.data <= 16'h0012;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 29) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 30) begin
-            spi_2_bus_if.data <= 16'h0002;
+            spi_2_bus_if.data <= 16'h000a;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 31) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 32) begin
-            spi_2_bus_if.data <= 16'h3000;
+            spi_2_bus_if.data <= 16'h0002;
             spi_2_bus_if.valid <= 1;
         end else if(cnt == 33) begin
             spi_2_bus_if.valid <= 0;
-        end else if((33 < cnt) && (cnt < 52)) begin
+        end else if(cnt == 34) begin
+            spi_2_bus_if.data <= 16'h3000;
+            spi_2_bus_if.valid <= 1;
+        end else if(cnt == 35) begin
+            spi_2_bus_if.valid <= 0;
+        end else if((35 < cnt) && (cnt < 52)) begin
             spi_2_bus_if.valid <= 0;
         end else if(cnt == 52) begin
             spi_2_bus_if.data <= 16'h6000;
