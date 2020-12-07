@@ -22,7 +22,7 @@ module Controller #(
     output  logic [WORD_SIZE-1:0] w_data,
     output  logic [ADDR_SIZE-1:0] w_addr,
     output  logic w_en,
-    input  logic [ADDR_SIZE-1:0] r_addr
+    output  logic [ADDR_SIZE-1:0] r_addr
 );
 
 parameter WAIT  = 2'b00;
@@ -116,7 +116,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                     mem_state <= MEM_WAIT;
                 end
                 l_d_o_addr <= ZERO_POINT_ADDR;
-                w_en        <= '0;
+                //w_en        <= '0;
                 w_addr_cnt  <= '0;
             end
             MEM_FETCH   : begin
@@ -150,7 +150,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end else begin
                     mem_state <= MEM_WAIT;
                 end
-                w_en        <= '1;
+                //w_en        <= '1;
                 w_addr      <= w_addr_buf + 1 + w_addr_cnt;
                 w_addr_buf_buf <= w_addr_buf; //TPU -> STMに使う
                 w_addr_cnt  <= w_addr_cnt + 1;
@@ -207,7 +207,7 @@ parameter MEM_CAL_WAIT = 2'b11;
         vec_shift_reg <= {vec_shift_reg[0], end_vec_flag};
         mat_shift_reg <= {mat_shift_reg[0], end_mat_flag};
         read_shift_reg <= {read_shift_reg[0], end_read_flag};
-        spi_ready_shift_reg <= {spi_ready_shift_reg[0], bus_2_spi_if.ready}
+        spi_ready_shift_reg <= {spi_ready_shift_reg[0], bus_2_spi_if.ready};
         if((write_vec_flag == 0) && (write_mat_flag == 0)) begin
             if(spi_shift_reg == 2'b01) begin
                 case(spi_2_bus_if.data[15:12])
@@ -265,6 +265,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                     mat_addr <= 0;
                 end else if(mat_sub_sub_cnt == row_size - 1) begin
                     mat_sub_sub_cnt <= 0;
+                    mat_addr <= mat_addr + 1;
                     mat_sub_cnt <= mat_sub_cnt + 1;
                 end else begin
                     mat_sub_sub_cnt <= mat_sub_sub_cnt + 1;
@@ -278,11 +279,11 @@ parameter MEM_CAL_WAIT = 2'b11;
         end else if(read_result_flag == 1) begin
             if(spi_ready_shift_reg == 2'b01) begin
                 if(r_addr_cnt < column_size - 1) begin
-                    end_read_flag <= 0;
-                    r_addr_cnt <= 0;
-                end else begin
-                    end_read_flag <= 1;
                     r_addr_cnt <= r_addr_cnt + 1;
+                    end_read_flag <= 0;
+                end else begin
+                    r_addr_cnt <= 0;
+                    end_read_flag <= 1;
                 end
                 r_addr <= w_addr_buf_buf + 1 + r_addr_cnt;
                 bus_2_spi_if.valid = 1;
