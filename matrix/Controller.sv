@@ -34,6 +34,15 @@ parameter MEM_FETCH = 2'b01;
 parameter MEM_WRITE = 2'b10;
 parameter MEM_CAL_WAIT = 2'b11;
 
+    logic w_en_result;
+    logic w_en_data;
+
+    logic [ADDR_SIZE-1:0] w_addr_result;
+    logic [ADDR_SIZE-1:0] w_addr_data;
+
+    logic [WORD_SIZE-1:0] w_data_result;
+    logic [WORD_SIZE-1:0] w_data_data;
+
     logic [7:0] row_size;
     logic [7:0] column_size;
 
@@ -116,15 +125,16 @@ parameter MEM_CAL_WAIT = 2'b11;
                     mem_state <= MEM_WAIT;
                 end
                 l_d_o_addr <= ZERO_POINT_ADDR;
-                //w_en        <= '0;
+                w_en_result <= '0;
                 w_addr_cnt  <= '0;
+                column_cnt  <= '0;
             end
             MEM_FETCH   : begin
                 if(column_cnt < column_size) begin
                     column_cnt <= column_cnt + 1;
-                    mem_index <= mem_index + column_size;
+                    mem_index <= mem_index + row_size;
                 end else begin
-                    column_cnt <= '0;
+                    column_cnt <= column_cnt;
                     mem_index <= '0;
                 end
                 if(row_cnt < row_size) begin    //vec fetch
@@ -150,8 +160,8 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end else begin
                     mem_state <= MEM_WAIT;
                 end
-                //w_en        <= '1;
-                w_addr      <= w_addr_buf + 1 + w_addr_cnt;
+                w_en_result <= '1;
+                w_addr_result   <= w_addr_buf + 1 + w_addr_cnt;
                 w_addr_buf_buf <= w_addr_buf; //TPU -> STMに使う
                 w_addr_cnt  <= w_addr_cnt + 1;
             end
@@ -165,10 +175,10 @@ parameter MEM_CAL_WAIT = 2'b11;
                 if(row_size > i) begin
                     if(column_cnt < column_size) begin
                         pe_t_o_addr[i]  <= MEM_HEAD_ADDR + row_size + i + mem_index;
-                        w_addr_buf      <= MEM_HEAD_ADDR + row_size + i + mem_index;
+                        w_addr_buf  <= MEM_HEAD_ADDR + row_size + i + mem_index;
                     end else begin
                         pe_t_o_addr[i]  <= ZERO_POINT_ADDR;
-                        w_addr_buf      <= w_addr_buf;
+                        w_addr_buf  <= w_addr_buf;
                     end
                 end else begin
                     pe_t_o_addr[i] <= ZERO_POINT_ADDR; 
@@ -240,9 +250,9 @@ parameter MEM_CAL_WAIT = 2'b11;
 
         if(write_vec_flag == 1) begin
             if(spi_shift_reg == 2'b01) begin
-                w_en <= 1;
-                w_addr <= vec_addr;
-                w_data <= spi_2_bus_if.data;
+                w_en_data <= 1;
+                w_addr_data <= vec_addr;
+                w_data_data <= spi_2_bus_if.data;
                 if(vec_addr == row_size - 1) begin
                     vec_addr <= 0;
                     write_vec_flag <= 0;
@@ -252,13 +262,13 @@ parameter MEM_CAL_WAIT = 2'b11;
                     end_vec_flag <= 0;
                 end
             end else begin
-                w_en <= 0;
+                w_en_data <= 0;
             end
         end else if(write_mat_flag == 1) begin
             if(spi_shift_reg == 2'b01) begin
-                w_en <= 1;
-                w_addr <= mat_addr + row_size;
-                w_data <= spi_2_bus_if.data;
+                w_en_data <= 1;
+                w_addr_data <= mat_addr + row_size;
+                w_data_data <= spi_2_bus_if.data;
                 if((mat_sub_cnt == column_size - 1) && (mat_sub_sub_cnt == row_size - 1)) begin
                     mat_sub_cnt <= 0;
                     end_mat_flag <= 1;
@@ -274,7 +284,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                     end_mat_flag <= 0;
                 end
             end else begin
-                w_en <= 0;
+                w_en_data <= 0;
             end
         end else if(read_result_flag == 1) begin
             if(spi_ready_shift_reg == 2'b01) begin
@@ -291,10 +301,21 @@ parameter MEM_CAL_WAIT = 2'b11;
                 bus_2_spi_if.valid = 0;
             end
         end else begin
-            w_en <= 0;
+            w_en_data <= 0;
             mat_addr <= 0;
             vec_addr <= 0;
         end
+    end
+
+    always_comb begin
+        if(write_mat_flag || write_vec_flag) begin
+            w_en = w_en_data;
+            w_addr = w_addr_data;
+        end else begin
+            w_en = w_en_result;
+            w_addr = w_addr_result;
+        end
+        w_data = w_data_data;
     end
 
 endmodule
