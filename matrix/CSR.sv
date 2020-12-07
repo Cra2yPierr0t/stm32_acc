@@ -1,10 +1,10 @@
-module #(
+module CSR #(
     parameter GENERAL_CSR_ADDR = 12'h000,
     parameter WRITE_COMMAND = 4'h1,
     parameter READ_COMMAND = 4'h2,
     parameter VEC_CSR_ADDR = 12'h001,
-    parameter MAT_CSR_ADDR = 12'h002,
-) CSR (
+    parameter MAT_CSR_ADDR = 12'h002
+)(
     input   logic clk,
     bus_if.slv_port spi_2_bus_if,
     bus_if.mst_port bus_2_spi_if,
