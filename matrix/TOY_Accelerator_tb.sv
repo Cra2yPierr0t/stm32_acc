@@ -11,8 +11,8 @@ module TOY_accelerator_tb(
     logic [15:0] l_d_i;
     logic [15:0] l_d_o;
     logic [9:0] l_d_o_addr;
-    logic [15:0] pe_t_w[2:0];
-    logic [9:0] pe_t_o_addr[2:0];
+    logic [15:0] pe_t_w[0:2];
+    logic [9:0] pe_t_o_addr[0:2];
     logic [9:0] w_addr;
     logic [15:0] w_data;
     logic w_en;
