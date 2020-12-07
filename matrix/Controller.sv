@@ -111,7 +111,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                     mem_state <= MEM_WAIT;
                 end
                 l_d_o_addr <= ZERO_POINT_ADDR;
-                w_en        <= '0;
+                //w_en        <= '0;
                 w_addr_cnt  <= '0;
             end
             MEM_FETCH   : begin
@@ -145,7 +145,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end else begin
                     mem_state <= MEM_WAIT;
                 end
-                w_en        <= '1;
+                //w_en        <= '1;
                 w_addr      <= w_addr_buf + 1 + w_addr_cnt;
                 w_addr_cnt  <= w_addr_cnt + 1;
             end
