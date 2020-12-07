@@ -305,11 +305,12 @@ parameter MEM_CAL_WAIT = 2'b11;
                 end
                 bus_2_spi_if.data   <= mem_r_data;
                 bus_2_spi_if.valid  <= 1;
+                r_addr <= w_addr_buf_buf + r_addr_cnt + 1;
             end else begin
                 r_addr_cnt <= r_addr_cnt;
+                r_addr <= r_addr;
             end
             w_en_data <= 1;
-            r_addr <= w_addr_buf_buf + r_addr_cnt + 1;
         end else begin
             w_en_data <= 0;
             mat_addr <= 0;
