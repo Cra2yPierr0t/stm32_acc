@@ -244,10 +244,10 @@ parameter MEM_CAL_WAIT = 2'b11;
                 endcase
             end
         end else begin
-            if(vec_shift_reg == 2'b01) begin
+            if(end_vec_flag) begin
                 write_vec_flag <= 0;
             end
-            if(mat_shift_reg == 2'b01) begin
+            if(end_mat_flag) begin
                 write_mat_flag <= 0;
             end
             if(read_shift_reg == 2'b01) begin
@@ -330,9 +330,11 @@ parameter MEM_CAL_WAIT = 2'b11;
                 w_en = 0;
             end
             w_data = spi_2_bus_if.data;
-            //w_addr = w_addr_data;
-            //w_data = w_data_data;
-            //w_en   = w_en_data;
+           /*
+            w_addr = w_addr_data;
+            w_data = w_data_data;
+            w_en   = w_en_data;
+            */
         end else begin
             w_en = w_en_result;
             w_addr = w_addr_result;
