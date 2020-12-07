@@ -136,12 +136,12 @@ parameter MEM_CAL_WAIT = 2'b11;
                 column_cnt  <= '0;
             end
             MEM_FETCH   : begin
-                if(column_cnt < column_size) begin
-                    column_cnt <= column_cnt + 1;
-                    mem_index <= mem_index + row_size;
-                    w_addr_buf  <= MEM_HEAD_ADDR + row_size + row_size - 1 + mem_index;
+                if(row_cnt < row_size) begin
+                    row_cnt <= row_cnt + 1;
+                    mem_index <= mem_index + column_size;
+                    w_addr_buf  <= MEM_HEAD_ADDR + row_size + column_size - 1 + mem_index;
                 end else begin
-                    column_cnt <= column_cnt;
+                    row_cnt <= row_cnt;
                     mem_index <= '0;
                     w_addr_buf  <= w_addr_buf;
                 end
@@ -180,8 +180,8 @@ parameter MEM_CAL_WAIT = 2'b11;
     for(i = 0; i < PE_NUMBER; i = i + 1) begin : gen_fetch_system
         always_ff @(posedge clk) begin
             if(mem_state == MEM_FETCH) begin
-                if(row_size > i) begin
-                    if(column_cnt < column_size) begin
+                if(column_size > i) begin
+                    if(row_cnt < row_size) begin
                         pe_t_o_addr[i]  <= MEM_HEAD_ADDR + row_size + i + mem_index;
                     end else begin
                         pe_t_o_addr[i]  <= ZERO_POINT_ADDR;
