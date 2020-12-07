@@ -5,6 +5,23 @@ module TOY_accelerator(
 );
 
     bus_if spi_2_bus_if();
+    bus_if bus_2_spi_if();
+
+    logic read, reset;
+    logic [15:0] l_d_i;
+    logic [15:0] l_d_o;
+    logic [9:0] l_d_o_addr;
+    logic [15:0] pe_t_w[2:0];
+    logic [9:0] pe_t_o_addr[2:0];
+    logic [9:0] w_addr;
+    logic [15:0] w_data;
+    logic w_en;
+    logic [9:0] r_addr;
+    logic [15:0] mem_r_data;
+
+    bus_if vec_csr_if();
+    bus_if mat_csr_if();
+    bus_if csr_if();
 
     spi_slave slave (
         .clk            (clk            ),
@@ -15,7 +32,7 @@ module TOY_accelerator(
     );
 
     Systolic_array #(
-        .PE_NUMBER  (64)
+        .PE_NUMBER  (3)
     ) Systolic_Array (
         .clk    (clk    ),
         .read   (read   ),
@@ -26,10 +43,10 @@ module TOY_accelerator(
     );
 
     Memory #(
-        .MEM_SIZE   (),
-        .ADDR_SIZE  (),
-        .WORD_SIZE  (),
-        .PE_NUMBER  ()
+        .MEM_SIZE   (1024),
+        .ADDR_SIZE  (10),
+        .WORD_SIZE  (16),
+        .PE_NUMBER  (3)
     ) Memory (
         .clk            (clk            ),
         .w_addr         (w_addr         ),
@@ -53,7 +70,7 @@ module TOY_accelerator(
     );
 
     Controller #(
-        .PE_NUMBER      (64),
+        .PE_NUMBER      (3),
         .MEM_HEAD_ADDR  (0),
         .ZERO_POINT_ADDR(16'h5555)
     ) Controller (

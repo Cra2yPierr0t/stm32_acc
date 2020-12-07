@@ -22,7 +22,9 @@ module Controller #(
     output  logic [WORD_SIZE-1:0] w_data,
     output  logic [ADDR_SIZE-1:0] w_addr,
     output  logic w_en,
-    output  logic [ADDR_SIZE-1:0] r_addr
+    output  logic [ADDR_SIZE-1:0] r_addr,
+    input   logic [WORD_SIZE-1:0] l_d_o,
+    input   logic [WORD_SIZE-1:0] mem_r_data
 );
 
 parameter WAIT  = 2'b00;
@@ -301,7 +303,8 @@ parameter MEM_CAL_WAIT = 2'b11;
                     r_addr_cnt <= 0;
                     end_read_flag <= 1;
                 end
-                bus_2_spi_if.valid <= 1;
+                bus_2_spi_if.data   <= mem_r_data;
+                bus_2_spi_if.valid  <= 1;
             end else begin
                 r_addr_cnt <= r_addr_cnt;
             end
@@ -318,11 +321,12 @@ parameter MEM_CAL_WAIT = 2'b11;
         if(write_mat_flag || write_vec_flag) begin
             w_en = w_en_data;
             w_addr = w_addr_data;
+            w_data = w_data_data;
         end else begin
             w_en = w_en_result;
             w_addr = w_addr_result;
+            w_data = l_d_o;
         end
-        w_data = w_data_data;
     end
 
 endmodule
