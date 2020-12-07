@@ -1,8 +1,13 @@
 module Controller #(
     parameter ADDR_SIZE = 10,
+    parameter WORD_SIZE = 16,
     parameter PE_NUMBER = 64,
     parameter MEM_HEAD_ADDR = 16'h000f,
-    parameter ZERO_POINT_ADDR = 16'hffff
+    parameter ZERO_POINT_ADDR = 16'hffff,
+    parameter START_CAL = 4'h3,
+    parameter WRITE_VEC = 4'h4,
+    parameter WRITE_MAT = 4'h5,
+    parameter READ_RESULT = 4'h6
 )(
     input   clk,
     bus_if.slv_port spi_2_bus_if,
@@ -13,6 +18,7 @@ module Controller #(
     bus_if.slv_port csr_if,
     output  logic [ADDR_SIZE-1:0] pe_t_o_addr[0:PE_NUMBER-1],
     output  logic [ADDR_SIZE-1:0] l_d_o_addr,
+    output  logic [WORD_SIZE-1:0] w_data,
     output  logic [ADDR_SIZE-1:0] w_addr,
     output  logic w_en
 );
@@ -167,4 +173,95 @@ parameter MEM_CAL_WAIT = 2'b11;
         end
     end
     endgenerate
+
+    logic [1:0] spi_shift_reg;
+    logic [1:0] vec_shift_reg;
+    logic [1:0] mat_shift_reg;
+
+    logic write_vec_flag = 0;
+    logic write_mat_flag = 0;
+
+    logic end_vec_flag = 0;
+    logic end_mat_flag = 0;
+
+    logic [9:0] mat_sub_cnt = '0;
+    logic [9:0] mat_sub_sub_cnt = '0;
+
+    logic [9:0] vec_addr = '0;
+    logic [9:0] mat_addr = '0;
+
+    always_ff @(posedge clk) begin
+        spi_shift_reg <= {spi_shift_reg[0], spi_2_bus_if.valid};
+        vec_shift_reg <= {vec_shift_reg[0], end_vec_flag};
+        mat_shift_reg <= {mat_shift_reg[0], end_mat_flag};
+        if((write_vec_flag == 0) && (write_mat_flag == 0)) begin
+            if(spi_shift_reg == 2'b01) begin
+                case(spi_2_bus_if.data[15:12])
+                    START_CAL   : begin
+                    end
+                    WRITE_VEC   : begin
+                        write_vec_flag <= 1;
+                    end
+                    WRITE_MAT   : begin
+                        write_mat_flag <= 1;
+                    end
+                    READ_RESULT : begin
+                    end
+                    default     : begin
+                    end
+                endcase
+            end else begin
+                if(vec_shift_reg == 2'b01) begin
+                    write_vec_flag <= 0;
+                end
+                if(mat_shift_reg == 2'b01) begin
+                    write_mat_flag <= 0;
+                end
+            end
+        end
+
+        if(write_vec_flag == 1) begin
+            if(spi_shift_reg == 2'b01) begin
+                w_en <= 1;
+                w_addr <= vec_addr;
+                w_data <= spi_2_bus_if.data;
+                if(vec_addr == vec_csr_if.data - 1) begin
+                    vec_addr <= 0;
+                    write_vec_flag <= 0;
+                    end_vec_flag <= 1;
+                end else begin
+                    vec_addr <= vec_addr + 1;
+                    end_vec_flag <= 0;
+                end
+            end else begin
+                w_en <= 0;
+            end
+        end else if(write_mat_flag == 1) begin
+            if(spi_shift_reg == 2'b01) begin
+                w_en <= 1;
+                w_addr <= mat_addr + vec_csr_if.data;
+                w_data <= spi_2_bus_if.data;
+                if((mat_sub_cnt == mat_csr_if.data - 1) && (mat_sub_sub_cnt == vec_csr_if.data - 1)) begin
+                    mat_sub_cnt <= 0;
+                    end_mat_flag <= 1;
+                    mat_addr <= 0;
+                end else if(mat_sub_sub_cnt == vec_csr_if.data - 1) begin
+                    mat_sub_sub_cnt <= 0;
+                    mat_sub_cnt <= mat_sub_cnt + 1;
+                end else begin
+                    mat_sub_sub_cnt <= mat_sub_sub_cnt + 1;
+                    mat_sub_cnt <= mat_sub_cnt;
+                    mat_addr <= mat_addr + 1;
+                    end_mat_flag <= 0;
+                end
+            end else begin
+                w_en <= 0;
+            end
+        end else begin
+            w_en <= 0;
+            mat_addr <= 0;
+            vec_addr <= 0;
+        end
+    end
+
 endmodule
