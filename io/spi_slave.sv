@@ -14,7 +14,7 @@ module spi_slave #(
     logic   [DATA_SIZE-1:0] mo_data;
     logic   [INDEX_WIDTH-1:0] mo_data_index = '0;
 
-    logic   [DATA_SIZE-1:0] so_data = '0;
+    logic   [DATA_SIZE-1:0] so_data = 16'h5555;
     logic   [INDEX_WIDTH-1:0] so_data_index = INDEX_WIDTH-1;
 
     logic [1:0] shift_reg = 2'b00;

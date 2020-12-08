@@ -1,4 +1,6 @@
-module TOY_accelerator(
+module TOY_Accelerator #(
+    parameter PE_NUMBER = 20
+)(
     input logic clk,
     spi_if.slv_port spi_port,
     input logic cs
@@ -11,8 +13,8 @@ module TOY_accelerator(
     logic [15:0] l_d_i;
     logic [15:0] l_d_o;
     logic [9:0] l_d_o_addr;
-    logic [15:0] pe_t_w[2:0];
-    logic [9:0] pe_t_o_addr[2:0];
+    logic [15:0] pe_t_w[0:PE_NUMBER-1];
+    logic [9:0] pe_t_o_addr[0:PE_NUMBER-1];
     logic [9:0] w_addr;
     logic [15:0] w_data;
     logic w_en;
@@ -32,7 +34,7 @@ module TOY_accelerator(
     );
 
     Systolic_array #(
-        .PE_NUMBER  (3)
+        .PE_NUMBER  (PE_NUMBER)
     ) Systolic_Array (
         .clk    (clk    ),
         .read   (read   ),
@@ -46,7 +48,7 @@ module TOY_accelerator(
         .MEM_SIZE   (1024),
         .ADDR_SIZE  (10),
         .WORD_SIZE  (16),
-        .PE_NUMBER  (3)
+        .PE_NUMBER  (PE_NUMBER)
     ) Memory (
         .clk            (clk            ),
         .w_addr         (w_addr         ),
@@ -70,9 +72,9 @@ module TOY_accelerator(
     );
 
     Controller #(
-        .PE_NUMBER      (3),
+        .PE_NUMBER      (PE_NUMBER),
         .MEM_HEAD_ADDR  (0),
-        .ZERO_POINT_ADDR(16'h5555)
+        .ZERO_POINT_ADDR(10'b11_1111_1111)
     ) Controller (
         .clk            (clk    ),
         .read           (read   ),

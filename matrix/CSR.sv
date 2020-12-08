@@ -17,8 +17,12 @@ module CSR #(
     logic [11:0] w_addr;
     logic r_flag = 0;
     logic [11:0] r_addr;
+    
+    logic [1:0] shift_reg;
 
-    always_ff @(posedge spi_2_bus_if.valid) begin
+    always_ff @(posedge clk) begin
+        shift_reg <= {shift_reg[0], spi_2_bus_if.valid};
+        if(shift_reg == 2'b01) begin
         if(w_flag) begin
             case(w_addr)
                 VEC_CSR_ADDR    : begin
@@ -67,6 +71,7 @@ module CSR #(
             vec_csr_if.valid <= 0;
             mat_csr_if.valid <= 0;
             csr_if.valid <= 0;
+        end
         end
     end
 

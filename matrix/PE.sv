@@ -11,10 +11,10 @@ module PE #(
     output  logic [WORD_SIZE-1:0] r_d_o
 );
 
-    logic [WORD_SIZE:0] buffer_w;
-    logic [WORD_SIZE:0] buffer;
+    logic [WORD_SIZE-1:0] buffer_w;
+    logic [WORD_SIZE-1:0] buffer;
 
-    logic [WORD_SIZE:0] r_d_o_r;
+    logic [WORD_SIZE-1:0] r_d_o_r;
     
     always_comb begin
         if(reset) begin
