@@ -14,8 +14,8 @@ module spi_slave #(
     logic   [DATA_SIZE-1:0] mo_data;
     logic   [INDEX_WIDTH-1:0] mo_data_index = '0;
 
-    logic   [DATA_SIZE-1:0] so_data = 16'h5555;
-    logic   [INDEX_WIDTH-1:0] so_data_index = INDEX_WIDTH-1;
+    logic   [DATA_SIZE-1:0] so_data = 16'h0000;
+    logic   [INDEX_WIDTH-1:0] so_data_index = DATA_SIZE-1;
 
     logic [1:0] shift_reg = 2'b00;
     logic [1:0] shift_reg_2 = 2'b00;
@@ -41,10 +41,11 @@ module spi_slave #(
                 so_data <= {so_data[DATA_SIZE-2:0], 1'b0};
                 so_data_index <= so_data_index - 1;
             end else begin
-                so_data_index <= INDEX_WIDTH - 1;
+                so_data_index <= DATA_SIZE - 1;
             end
         end else if(shift_reg_2 == 2'b01) begin
             so_data <= bus_slv_port.data;
+            so_data_index <= DATA_SIZE - 1;
         end else begin
             so_data <= so_data; 
             so_data_index <= so_data_index;
@@ -54,8 +55,8 @@ module spi_slave #(
     always_comb begin
         bus_mst_port.valid = (mo_data_index == '0);
         bus_mst_port.data  = mo_data;
-        spi_port.miso = so_data[DATA_SIZE-1];
-        if(so_data_index == INDEX_WIDTH-1) begin
+        spi_port.miso <= so_data[DATA_SIZE-1];
+        if(so_data_index == DATA_SIZE-1) begin
             bus_slv_port.ready = 1;
         end else begin
             bus_slv_port.ready = 0;
