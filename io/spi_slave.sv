@@ -38,8 +38,12 @@ module spi_slave #(
         if(shift_reg == 2'b10) begin    // write
             if(cs == 0) begin
                 //spi_port.miso <= so_data[so_data_index];
-                so_data <= {so_data[DATA_SIZE-2:0], 1'b0};
                 so_data_index <= so_data_index - 1;
+                if(so_data_index == 0) begin
+                    bus_slv_port.ready = 1;
+                end else begin
+                    bus_slv_port.ready = 0;
+                end
             end else begin
                 so_data_index <= DATA_SIZE - 1;
             end
@@ -53,13 +57,8 @@ module spi_slave #(
     end
 
     always_comb begin
+        spi_port.miso = bus_slv_port.data[so_data_index];
         bus_mst_port.valid = (mo_data_index == '0);
         bus_mst_port.data  = mo_data;
-        spi_port.miso <= so_data[DATA_SIZE-1];
-        if(so_data_index == DATA_SIZE-1) begin
-            bus_slv_port.ready = 1;
-        end else begin
-            bus_slv_port.ready = 0;
-        end
     end
 endmodule

@@ -2,9 +2,11 @@ module TOY_Accelerator #(
     parameter PE_NUMBER = 20
 )(
     input logic clk,
+    output logic [3:0] led,
     spi_if.slv_port spi_port,
     input logic cs
 );
+
 
     bus_if spi_2_bus_if();
     bus_if bus_2_spi_if();
@@ -25,12 +27,14 @@ module TOY_Accelerator #(
     bus_if mat_csr_if();
     bus_if csr_if();
 
+    assign led = vec_csr_if.data;
+
     spi_slave slave (
         .clk            (clk            ),
         .cs             (cs             ),
         .spi_port       (spi_port       ),
         .bus_mst_port   (spi_2_bus_if   ),
-        .bus_slv_port   (bus_2_spi_if   ),
+        .bus_slv_port   (bus_2_spi_if   )
     );
 
     Systolic_array #(
