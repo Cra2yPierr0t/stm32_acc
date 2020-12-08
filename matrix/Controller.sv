@@ -200,6 +200,7 @@ parameter MEM_CAL_WAIT = 2'b11;
     logic [1:0] vec_shift_reg;
     logic [1:0] mat_shift_reg;
     logic [1:0] read_shift_reg;
+    logic [1:0] read_shift_reg_2;
     logic [1:0] spi_ready_shift_reg;
 
     logic write_vec_flag = 0;
@@ -223,6 +224,7 @@ parameter MEM_CAL_WAIT = 2'b11;
         vec_shift_reg <= {vec_shift_reg[0], end_vec_flag};
         mat_shift_reg <= {mat_shift_reg[0], end_mat_flag};
         read_shift_reg <= {read_shift_reg[0], end_read_flag};
+        read_shift_reg_2 <= {read_shift_reg_2[0], read_result_flag};
         spi_ready_shift_reg <= {spi_ready_shift_reg[0], bus_2_spi_if.ready};
         if((write_vec_flag == 0) && (write_mat_flag == 0)) begin
             if(spi_shift_reg == 2'b01) begin
@@ -240,6 +242,7 @@ parameter MEM_CAL_WAIT = 2'b11;
                         read_result_flag <= 1;
                     end
                     default     : begin
+                        start_flag <= 0;
                     end
                 endcase
             end
@@ -253,7 +256,6 @@ parameter MEM_CAL_WAIT = 2'b11;
             if(read_shift_reg == 2'b01) begin
                 read_result_flag <= 0;
             end
-            start_flag <= 0;
         end
 
         if(write_vec_flag == 1) begin
@@ -294,28 +296,33 @@ parameter MEM_CAL_WAIT = 2'b11;
             end else begin
                 w_en_data <= 0;
             end
+        end else if(read_shift_reg_2 == 2'b01) begin
+            bus_2_spi_if.valid <= 1;
         end else if(read_result_flag == 1) begin
             if(spi_ready_shift_reg == 2'b01) begin
                 if(r_addr_cnt < column_size - 1) begin
                     r_addr_cnt <= r_addr_cnt + 1;
                     end_read_flag <= 0;
+                    bus_2_spi_if.valid <= 1;
                 end else begin
                     r_addr_cnt <= 0;
                     end_read_flag <= 1;
                 end
-                bus_2_spi_if.data   <= mem_r_data;
-                bus_2_spi_if.valid  <= 1;
-                r_addr <= w_addr_buf_buf + r_addr_cnt + 1;
             end else begin
                 r_addr_cnt <= r_addr_cnt;
-                r_addr <= r_addr;
+                bus_2_spi_if.valid  <= 0;
             end
             w_en_data <= 1;
         end else begin
             w_en_data <= 0;
             mat_addr <= 0;
             vec_addr <= 0;
+            r_addr_cnt <= 0;
         end
+    end
+    always_comb begin
+        r_addr = w_addr_buf_buf + r_addr_cnt + 1;
+        bus_2_spi_if.data = mem_r_data;
     end
 
     always_comb begin

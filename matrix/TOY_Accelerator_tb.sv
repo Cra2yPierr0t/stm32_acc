@@ -1,12 +1,17 @@
 `include "../io/if.sv"
+`include "../io/spi_slave.sv"
 module TOY_accelerator_tb(
     input logic clk
 );
 
     bus_if spi_2_bus_if();
+    bus_if spi_2_bus_if_dummy();
     bus_if bus_2_spi_if();
     bus_if bus_2_spi_if_dummy();
 
+    spi_if spi_port();
+
+    logic cs;
     logic read, reset;
     logic [15:0] l_d_i;
     logic [15:0] l_d_o;
@@ -22,6 +27,15 @@ module TOY_accelerator_tb(
     bus_if vec_csr_if();
     bus_if mat_csr_if();
     bus_if csr_if();
+
+    spi_slave slave (
+        .clk            (clk            ),
+        .cs             (cs             ),
+        .spi_port       (spi_port       ),
+        .bus_mst_port   (spi_2_bus_if_dummy   ),
+        .bus_slv_port   (bus_2_spi_if   )
+    );
+
 
     Systolic_array #(
         .PE_NUMBER  (3)
@@ -179,27 +193,95 @@ module TOY_accelerator_tb(
             spi_2_bus_if.valid <= 0;
         end else if((53 < cnt) && (cnt < 55)) begin
             spi_2_bus_if.valid <= 0;
-            bus_2_spi_if.ready <= 0;
+            //bus_2_spi_if.ready <= 0;
         end else if(cnt == 55) begin
-            bus_2_spi_if.ready <= 1;
+            spi_port.sclk = 0;
+            //bus_2_spi_if.ready <= 1;
         end else if(cnt == 56) begin
-            bus_2_spi_if.ready <= 0;
+            //bus_2_spi_if.ready <= 0;
         end else if(cnt == 57) begin
-            bus_2_spi_if.ready <= 0;
+            spi_port.sclk = 0;
+            //bus_2_spi_if.ready <= 0;
         end else if(cnt == 58) begin
-            bus_2_spi_if.ready <= 0;
+            spi_port.sclk = 0;
+            //bus_2_spi_if.ready <= 0;
         end else if(cnt == 59) begin
-            bus_2_spi_if.ready <= 1;
+            spi_port.sclk = 0;
+            //bus_2_spi_if.ready <= 1;
         end else if(cnt == 60) begin
-            bus_2_spi_if.ready <= 0;
+            //bus_2_spi_if.ready <= 0;
         end else if(cnt == 61) begin
-            bus_2_spi_if.ready <= 0;
+            spi_port.sclk = 0;
+            //bus_2_spi_if.ready <= 0;
         end else if(cnt == 62) begin
-            bus_2_spi_if.ready <= 0;
+            spi_port.sclk = 1;
+            //bus_2_spi_if.ready <= 0;
         end else if(cnt == 63) begin
-            bus_2_spi_if.ready <= 0;
+            spi_port.sclk = 1;
+            //bus_2_spi_if.ready <= 0;
+        end else if((63 < cnt) && (cnt < 140)) begin
+            spi_port.sclk = 0;
+        end else if((143 < cnt) && (cnt < 146)) begin
+            spi_port.sclk = 1;
+        end else if((145 < cnt) && (cnt < 148)) begin
+            spi_port.sclk = 0;
+        end else if((147 < cnt) && (cnt < 150)) begin
+            spi_port.sclk = 1;
+        end else if((149 < cnt) && (cnt < 152)) begin
+            spi_port.sclk = 0;
+        end else if((151 < cnt) && (cnt < 154)) begin
+            spi_port.sclk = 1;
+        end else if((153 < cnt) && (cnt < 156)) begin
+            spi_port.sclk = 0;
+        end else if((155 < cnt) && (cnt < 158)) begin
+            spi_port.sclk = 1;
+        end else if((157 < cnt) && (cnt < 160)) begin
+            spi_port.sclk = 0;
+        end else if((159 < cnt) && (cnt < 162)) begin
+            spi_port.sclk = 1;
+        end else if((161 < cnt) && (cnt < 164)) begin
+            spi_port.sclk = 0;
+        end else if((163 < cnt) && (cnt < 166)) begin
+            spi_port.sclk = 1;
+        end else if((165 < cnt) && (cnt < 168)) begin
+            spi_port.sclk = 0;
+        end else if((167 < cnt) && (cnt < 170)) begin
+            spi_port.sclk = 1;
+        end else if((169 < cnt) && (cnt < 172)) begin
+            spi_port.sclk = 0;
+        end else if((171 < cnt) && (cnt < 174)) begin
+            spi_port.sclk = 1;
+        end else if((173 < cnt) && (cnt < 176)) begin
+            spi_port.sclk = 0;
+        end else if((175 < cnt) && (cnt < 178)) begin
+            spi_port.sclk = 1;
+        end else if((177 < cnt) && (cnt < 180)) begin
+            spi_port.sclk = 0;
+        end else if((179 < cnt) && (cnt < 182)) begin
+            spi_port.sclk = 1;
+        end else if((181 < cnt) && (cnt < 184)) begin
+            spi_port.sclk = 0;
+        end else if((183 < cnt) && (cnt < 186)) begin
+            spi_port.sclk = 1;
+        end else if((185 < cnt) && (cnt < 188)) begin
+            spi_port.sclk = 0;
+        end else if((187 < cnt) && (cnt < 190)) begin
+            spi_port.sclk = 1;
+        end else if((189 < cnt) && (cnt < 192)) begin
+            spi_port.sclk = 0;
+        end else if((191 < cnt) && (cnt < 194)) begin
+            spi_port.sclk = 1;
+        end else if((193 < cnt) && (cnt < 196)) begin
+            spi_port.sclk = 0;
+        end else if((195 < cnt) && (cnt < 198)) begin
+            spi_port.sclk = 1;
+        end else if((197 < cnt) && (cnt < 200)) begin
+            spi_port.sclk = 0;
+        end else if((199 < cnt) && (cnt < 202)) begin
+            spi_port.sclk = 1;
         end else begin
-            bus_2_spi_if.ready <= 0;
+            spi_port.sclk = 0;
+            //bus_2_spi_if.ready <= 0;
         end
     end
 

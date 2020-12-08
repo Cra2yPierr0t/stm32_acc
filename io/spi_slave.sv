@@ -1,6 +1,6 @@
 module spi_slave #(
     parameter DATA_SIZE = 16,
-    parameter INDEX_WIDTH = $clog(DATA_SIZE),
+    parameter INDEX_WIDTH = 4,
     parameter FPGA_CLK  = 12_000_000,
     parameter SPI_CLK   = 1_000_000
 )(
@@ -15,7 +15,7 @@ module spi_slave #(
     logic   [INDEX_WIDTH-1:0] mo_data_index = '0;
 
     logic   [DATA_SIZE-1:0] so_data = '0;
-    logic   [INDEX_WIDTH-1:0] so_data_index = '0;
+    logic   [INDEX_WIDTH-1:0] so_data_index = INDEX_WIDTH-1;
 
     logic [1:0] shift_reg = 2'b00;
     logic [1:0] shift_reg_2 = 2'b00;
@@ -34,33 +34,31 @@ module spi_slave #(
             mo_data_index <= mo_data_index;
         end
         
+        shift_reg_2 <= {shift_reg_2[0], bus_slv_port.valid};
         if(shift_reg == 2'b10) begin    // write
             if(cs == 0) begin
-                spi_port.miso <= so_data[~so_data_index];
-                so_data_index <= so_data_index + 1;
+                //spi_port.miso <= so_data[so_data_index];
+                so_data <= {so_data[DATA_SIZE-2:0], 1'b0};
+                so_data_index <= so_data_index - 1;
             end else begin
-                spi_port.miso <= so_data[INDEX_WIDTH-1];
-                so_data_index <= 1;
+                so_data_index <= INDEX_WIDTH - 1;
             end
-            if(so_data_index == '0) begin
-                bus_slv_port.ready <= 1;
-            end else begin
-                bus_slv_port.ready <= 0;
-            end
-        end else begin
-            spi_port.miso <= spi_port.miso;
-            so_data_index <= so_data_index;
-        end
-        shift_reg_2 <= {shift_reg_2[0], bus_slv_port.valid};
-        if(shift_reg_2 == 2'b01) begin
+        end else if(shift_reg_2 == 2'b01) begin
             so_data <= bus_slv_port.data;
         end else begin
-            so_data <= so_data;
+            so_data <= so_data; 
+            so_data_index <= so_data_index;
         end
     end
 
     always_comb begin
         bus_mst_port.valid = (mo_data_index == '0);
         bus_mst_port.data  = mo_data;
+        spi_port.miso = so_data[DATA_SIZE-1];
+        if(so_data_index == INDEX_WIDTH-1) begin
+            bus_slv_port.ready = 1;
+        end else begin
+            bus_slv_port.ready = 0;
+        end
     end
 endmodule
