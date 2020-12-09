@@ -45,16 +45,16 @@ parameter MEM_CAL_WAIT = 2'b11;
     logic [WORD_SIZE-1:0] w_data_result;
     logic [WORD_SIZE-1:0] w_data_data;
 
-    logic [7:0] row_size;
-    logic [7:0] column_size;
+    logic [31:0] row_size;
+    logic [31:0] column_size;
 
-    logic [7:0] mem_index = '0;
+    logic [31:0] mem_index = '0;
 
-    logic [7:0] cal_cnt = 8'h00;
-    logic [7:0] read_cnt = 8'h00;
+    logic [31:0] cal_cnt = 8'h00;
+    logic [31:0] read_cnt = 8'h00;
 
-    logic [7:0] row_cnt = '0;
-    logic [7:0] column_cnt = '0;
+    logic [31:0] row_cnt = '0;
+    logic [31:0] column_cnt = '0;
 
     logic   run_req = 0;
 
