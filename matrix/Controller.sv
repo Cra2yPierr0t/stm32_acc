@@ -226,7 +226,7 @@ parameter MEM_CAL_WAIT = 2'b11;
         read_shift_reg <= {read_shift_reg[0], end_read_flag};
         read_shift_reg_2 <= {read_shift_reg_2[0], read_result_flag};
         spi_ready_shift_reg <= {spi_ready_shift_reg[0], bus_2_spi_if.ready};
-        if((write_vec_flag == 0) && (write_mat_flag == 0)) begin
+        if((write_vec_flag == 0) && (write_mat_flag == 0) && (read_result_flag == 0)) begin
             if(spi_shift_reg == 2'b01) begin
                 case(spi_2_bus_if.data[15:12])
                     START_CAL   : begin
