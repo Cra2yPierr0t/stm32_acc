@@ -247,10 +247,12 @@ parameter MEM_CAL_WAIT = 2'b11;
                 endcase
             end
         end else begin
-            if(end_vec_flag) begin
+            //if(end_vec_flag) begin
+            if(vec_shift_reg == 2'b01) begin
                 write_vec_flag <= 0;
             end
-            if(end_mat_flag) begin
+            //if(end_mat_flag) begin
+            if(mat_shift_reg == 2'b01) begin
                 write_mat_flag <= 0;
             end
             if(read_shift_reg == 2'b01) begin
