@@ -22,7 +22,7 @@ int main(int argc, char **argv){
         top->eval();
         tfp->dump(main_time);
 
-        if(main_time > 2500000)
+        if(main_time > 50000000)
             break;
         
         main_time++;

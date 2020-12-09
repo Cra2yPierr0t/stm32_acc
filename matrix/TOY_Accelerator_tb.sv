@@ -2,7 +2,7 @@
 `include "../io/spi_slave.sv"
 `include "../io/virtual_spi_master.sv"
 module TOY_accelerator_tb #(
-    parameter PE_NUMBER = 30
+    parameter PE_NUMBER = 32
 )(
     input logic clk
 );
