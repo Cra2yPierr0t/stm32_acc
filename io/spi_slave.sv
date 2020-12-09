@@ -40,6 +40,7 @@ module spi_slave #(
                 //spi_port.miso <= so_data[so_data_index];
                 so_data_index <= so_data_index - 1;
                 if(so_data_index == 0) begin
+                    so_data <= '0; 
                     bus_slv_port.ready = 1;
                 end else begin
                     bus_slv_port.ready = 0;
@@ -57,7 +58,8 @@ module spi_slave #(
     end
 
     always_comb begin
-        spi_port.miso = bus_slv_port.data[so_data_index];
+        //spi_port.miso = bus_slv_port.data[so_data_index];
+        spi_port.miso = so_data[so_data_index];
         bus_mst_port.valid = (mo_data_index == '0);
         bus_mst_port.data  = mo_data;
     end
