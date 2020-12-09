@@ -1,5 +1,7 @@
 module TOY_Accelerator #(
-    parameter PE_NUMBER = 20
+    parameter PE_NUMBER = 40,
+    parameter ADDR_SIZE = 11,
+    parameter MEM_SIZE  = 3000
 )(
     input logic clk,
     output logic [3:0] led,
@@ -14,13 +16,13 @@ module TOY_Accelerator #(
     logic read, reset;
     logic [15:0] l_d_i;
     logic [15:0] l_d_o;
-    logic [9:0] l_d_o_addr;
+    logic [ADDR_SIZE-1:0] l_d_o_addr;
     logic [15:0] pe_t_w[0:PE_NUMBER-1];
-    logic [9:0] pe_t_o_addr[0:PE_NUMBER-1];
-    logic [9:0] w_addr;
+    logic [ADDR_SIZE-1:0] pe_t_o_addr[0:PE_NUMBER-1];
+    logic [ADDR_SIZE-1:0] w_addr;
     logic [15:0] w_data;
     logic w_en;
-    logic [9:0] r_addr;
+    logic [ADDR_SIZE-1:0] r_addr;
     logic [15:0] mem_r_data;
 
     bus_if vec_csr_if();
@@ -49,8 +51,8 @@ module TOY_Accelerator #(
     );
 
     Memory #(
-        .MEM_SIZE   (1024),
-        .ADDR_SIZE  (10),
+        .MEM_SIZE   (4096),
+        .ADDR_SIZE  (12),
         .WORD_SIZE  (16),
         .PE_NUMBER  (PE_NUMBER)
     ) Memory (
@@ -78,6 +80,7 @@ module TOY_Accelerator #(
     Controller #(
         .PE_NUMBER      (PE_NUMBER),
         .MEM_HEAD_ADDR  (0),
+        .ADDR_SIZE      (12),
         .ZERO_POINT_ADDR(10'b11_1111_1111)
     ) Controller (
         .clk            (clk    ),

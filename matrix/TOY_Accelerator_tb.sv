@@ -1,7 +1,9 @@
 `include "../io/if.sv"
 `include "../io/spi_slave.sv"
 `include "../io/virtual_spi_master.sv"
-module TOY_accelerator_tb(
+module TOY_accelerator_tb #(
+    parameter PE_NUMBER = 30
+)(
     input logic clk
 );
 
@@ -16,13 +18,13 @@ module TOY_accelerator_tb(
     logic read, reset;
     logic [15:0] l_d_i;
     logic [15:0] l_d_o;
-    logic [9:0] l_d_o_addr;
-    logic [15:0] pe_t_w[0:9];
-    logic [9:0] pe_t_o_addr[0:9];
-    logic [9:0] w_addr;
+    logic [10:0] l_d_o_addr;
+    logic [15:0] pe_t_w[0:PE_NUMBER-1];
+    logic [10:0] pe_t_o_addr[0:PE_NUMBER-1];
+    logic [10:0] w_addr;
     logic [15:0] w_data;
     logic w_en;
-    logic [9:0] r_addr;
+    logic [10:0] r_addr;
     logic [15:0] mem_r_data;
 
     bus_if vec_csr_if();
@@ -44,7 +46,7 @@ module TOY_accelerator_tb(
 
 
     Systolic_array #(
-        .PE_NUMBER  (10)
+        .PE_NUMBER  (PE_NUMBER)
     ) Systolic_Array (
         .clk    (clk    ),
         .read   (read   ),
@@ -55,10 +57,10 @@ module TOY_accelerator_tb(
     );
 
     Memory #(
-        .MEM_SIZE   (1024),
-        .ADDR_SIZE  (10),
+        .MEM_SIZE   (3000),
+        .ADDR_SIZE  (11),
         .WORD_SIZE  (16),
-        .PE_NUMBER  (10)
+        .PE_NUMBER  (PE_NUMBER)
     ) Memory (
         .clk            (clk            ),
         .w_addr         (w_addr         ),
@@ -82,7 +84,8 @@ module TOY_accelerator_tb(
     );
 
     Controller #(
-        .PE_NUMBER      (10),
+        .PE_NUMBER      (PE_NUMBER),
+        .ADDR_SIZE      (11),
         .MEM_HEAD_ADDR  (0),
         .ZERO_POINT_ADDR(16'h5555)
     ) Controller (
